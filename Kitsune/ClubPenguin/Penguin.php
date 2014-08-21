@@ -18,11 +18,17 @@ class Penguin {
 	public $age;
 
 	public $avatar;
+	public $avatarAttributes;
+	
 	public $coins;
-	public $inventory;
+	
+	public $careInventory = array();
+	public $inventory = array();
 	
 	public $moderator;
 	public $muted = false;
+	
+	public $membershipDays;
 	
 	public $activeIgloo;
 	
@@ -31,15 +37,16 @@ class Penguin {
 	public $floors = array();
 	public $igloos = array();
 	public $recentStamps = "";
-	public $EPF = array();
 	
 	public $x = 0;
 	public $y = 0;
 	public $frame;
 	
+	public $waddleRoom = null; // Not an object!
 	public $room;
 	
 	public $walkingPuffle = array();
+	public $puffleQuest = array();
 	
 	public $socket;
 	public $database;
@@ -47,6 +54,32 @@ class Penguin {
 	public function __construct($socket) {
 		$this->socket = $socket;
 		$this->database = new Kitsune\Database();
+	}
+	
+	public function buyPuffleCareItem($itemId, $itemCost = 0, $howMany = null, $beSilent = false) {
+		if(isset($this->careInventory[$itemId])) {
+			$itemQuantity = $this->careInventory[$itemId] + $howMany;
+		} else {
+			$itemQuantity = $howMany;
+		}
+		
+		if($itemCost !== 0) {
+			$this->setCoins($this->coins - $itemCost);
+		}
+		
+		$this->careInventory[$itemId] = $itemQuantity;
+		
+		$careInventory = implode('%', array_map(
+			function($itemId, $itemQuantity) {
+				return sprintf("%d|%d", $itemId, $itemQuantity);
+			}, array_keys($this->careInventory), $this->careInventory
+		));
+		
+		$this->database->updateColumnById($this->id, "CareInventory", $careInventory);
+		
+		if($beSilent !== true) {
+			$this->send("%xt%papi%{$this->room->internalId}%{$this->coins}%$itemId%$itemQuantity%");
+		}
 	}
 	
 	public function setCoins($coinAmount) {
@@ -216,7 +249,7 @@ class Penguin {
 		$this->randomKey = null;
 		
 		$clothing = array("Color", "Head", "Face", "Neck", "Body", "Hand", "Feet", "Photo", "Flag", "Walking");
-		$player = array("Avatar", "RegistrationDate", "Moderator", "Inventory", "Coins");
+		$player = array("Avatar", "AvatarAttributes", "RegistrationDate", "Moderator", "Inventory", "CareInventory", "Coins");
 		$igloo = array("Furniture", "Floors", "Igloos", "Locations");
 		
 		$columns = array_merge($clothing, $player, $igloo);
@@ -271,10 +304,23 @@ class Penguin {
 		list($this->color, $this->head, $this->face, $this->neck, $this->body, $this->hand, $this->feet, $this->photo, $this->flag) = array_values($playerArray);
 		
 		$this->age = floor((strtotime("NOW") - $playerArray["RegistrationDate"]) / 86400); 
+		$this->membershipDays = $this->age;
+		
 		$this->avatar = $playerArray["Avatar"];
+		$this->avatarAttributes = $playerArray["AvatarAttributes"];
+		
 		$this->coins = $playerArray["Coins"];
 		$this->moderator = (boolean)$playerArray["Moderator"];
 		$this->inventory = explode('%', $playerArray["Inventory"]);
+		
+		$careInventory = explode('%', $playerArray["CareInventory"]);
+		if(!empty($careInventory)) {
+			foreach($careInventory as $puffleItem) {
+				list($itemId, $quantity) = explode('|', $puffleItem);
+				
+				$this->careInventory[$itemId] = $quantity;
+			}
+		}
 		
 		if($playerArray["Walking"] != 0) {
 			$puffle = $this->database->getPuffleColumns($playerArray["Walking"], array("Type", "Subtype", "Hat"));
@@ -301,9 +347,9 @@ class Penguin {
 			$this->y,
 			$this->frame,
 			1,
-			146,
-			0,
-			$this->avatar
+			$this->membershipDays,
+			$this->avatar,
+			$this->avatarAttributes
 		);
 		
 		if(!empty($this->walkingPuffle)) {

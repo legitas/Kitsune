@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 26, 2014 at 03:30 AM
+-- Generation Time: Jun 30, 2014 at 03:36 AM
 -- Server version: 5.6.16
 -- PHP Version: 5.5.11
 
@@ -19,6 +19,24 @@ SET time_zone = "+00:00";
 --
 -- Database: `kitsune`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bans`
+--
+
+CREATE TABLE IF NOT EXISTS `bans` (
+  `ID` int(11) NOT NULL AUTO_INCREMENT,
+  `Moderator` char(12) NOT NULL,
+  `Player` int(11) unsigned NOT NULL,
+  `Comment` text NOT NULL,
+  `Expiration` int(8) NOT NULL,
+  `Time` int(8) NOT NULL,
+  `Type` smallint(3) unsigned NOT NULL,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `Time` (`Time`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -53,11 +71,13 @@ CREATE TABLE IF NOT EXISTS `penguins` (
   `LoginKey` char(32) NOT NULL,
   `ConfirmationHash` char(32) NOT NULL,
   `SWID` char(38) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `Avatar` char(98) NOT NULL DEFAULT '{"spriteScale":100,"spriteSpeed":100,"ignoresBlockLayer":false,"invisible":false,"floating":false}',
+  `Avatar` tinyint(3) unsigned NOT NULL DEFAULT '0' COMMENT 'Don''t think ID will go beyond 255',
+  `AvatarAttributes` char(98) NOT NULL DEFAULT '{"spriteScale":100,"spriteSpeed":100,"ignoresBlockLayer":false,"invisible":false,"floating":false}',
   `Email` char(254) NOT NULL,
   `RegistrationDate` int(8) NOT NULL,
   `Moderator` tinyint(1) NOT NULL DEFAULT '0',
   `Inventory` text NOT NULL,
+  `CareInventory` text NOT NULL,
   `Coins` mediumint(7) unsigned NOT NULL DEFAULT '200000',
   `Igloo` int(10) unsigned NOT NULL COMMENT 'Current active igloo',
   `Igloos` text NOT NULL COMMENT 'Owned igloo types',
@@ -78,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `penguins` (
   `Stamps` text NOT NULL,
   `StampBook` varchar(150) NOT NULL DEFAULT '1%1%1%1',
   `EPF` varchar(9) NOT NULL DEFAULT '0,0,0',
+  `PuffleQuest` varchar(25) NOT NULL DEFAULT '0,1,|0;0;1403959119;',
   PRIMARY KEY (`ID`),
   UNIQUE KEY `Username` (`Username`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=101 ;
