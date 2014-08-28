@@ -19,7 +19,7 @@ trait Item {
 		
 		if(!isset($this->items[$itemId])) {
 			return $penguin->send("%xt%e%-1%402%");
-		} elseif(isset($this->penguin->inventory[$itemId])) {
+		} elseif(in_array($itemId, $penguin->inventory)) {
 			return $penguin->send("%xt%e%-1%400%");
 		}
 		
