@@ -105,7 +105,7 @@ trait Navigation {
 		
 		$room = Packet::$Data[2];
 		$x = Packet::$Data[3];
-		$y = Packet::$Data[3];
+		$y = Packet::$Data[4];
 		
 		$this->joinRoom($penguin, $room, $x, $y);
 	}
