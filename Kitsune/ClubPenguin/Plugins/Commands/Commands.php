@@ -83,7 +83,7 @@ final class Commands extends Plugin {
     
 	    public function handleChangeNick($penguin, $arguments)
 	    {
-	    $blockedNicks = array("ShawnTD", "Hagrid", "Xangos", "Shawn", "Herbert", "Cadence");
+	    $blockedNicks = array("", "", "", "", "", "");
 	    if(!in_array($blockedNicks, $arguments)) {
 	    if($penguin->moderator){
 	    list($newNick) = $arguments;
