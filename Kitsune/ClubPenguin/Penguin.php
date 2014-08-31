@@ -9,6 +9,7 @@ class Penguin {
 
 	public $id;
 	public $username;
+	public $nickname;
 	public $swid;
 
 	public $identified;
@@ -29,6 +30,7 @@ class Penguin {
 	public $muted = false;
 	
 	public $membershipDays;
+	public $badgeLevel;
 	
 	public $activeIgloo;
 	
@@ -179,6 +181,41 @@ class Penguin {
 		$this->send("%xt%aloc%{$this->room->internalId}%$locationId%{$this->coins}%");
 	}
 	
+	public function updateNick($nickname)
+	{
+	$this->database->updateColumnById($this->id, "Nickname", $nickname);
+	$this->getPlayerString();
+	$this->loadPlayer();
+	}
+	
+	public function handleTransformCommand($avatarID)
+	{
+	$this->database->updateColumnById($this->id, "Avatar", $avatarID);
+	$this->room->send("%xt%spts%{$this->room->internalId}%{$this->id}%$avatarID%");
+	$this->getPlayerString();
+	$this->loadPlayer();
+	}
+	
+	public function mascotItemUpdate($colour, $head, $face, $neck, $body, $hand, $feet) {
+		$this->database->updateColumnById($this->id, "Color", $colour);
+		$this->room->send("%xt%upc%{$this->room->internalId}%{$this->id}%$colour%");
+		$this->database->updateColumnById($this->id, "Head", $head);
+		$this->room->send("%xt%uph%{$this->room->internalId}%{$this->id}%$head%");
+		$this->database->updateColumnById($this->id, "Face", $face);
+		$this->room->send("%xt%upf%{$this->room->internalId}%{$this->id}%$face%");
+		$this->database->updateColumnById($this->id, "Neck", $neck);
+		$this->room->send("%xt%upn%{$this->room->internalId}%{$this->id}%$neck%");
+		$this->database->updateColumnById($this->id, "Body", $body);
+		$this->room->send("%xt%upb%{$this->room->internalId}%{$this->id}%$body%");
+		$this->database->updateColumnById($this->id, "Hand", $hand);
+		$this->room->send("%xt%upa%{$this->room->internalId}%{$this->id}%$hand%");
+		$this->database->updateColumnById($this->id, "Feet", $feet);
+		$this->room->send("%xt%upe%{$this->room->internalId}%{$this->id}%$feet%");
+	    $this->getPlayerString();
+	    $this->loadPlayer();
+	}
+
+	
 	public function updateColor($itemId) {
 		$this->color = $itemId;
 		$this->database->updateColumnById($this->id, "Color", $itemId);
@@ -249,7 +286,7 @@ class Penguin {
 		$this->randomKey = null;
 		
 		$clothing = array("Color", "Head", "Face", "Neck", "Body", "Hand", "Feet", "Photo", "Flag", "Walking");
-		$player = array("Avatar", "AvatarAttributes", "RegistrationDate", "Moderator", "Inventory", "CareInventory", "Coins");
+		$player = array("Nickname", "Avatar", "AvatarAttributes", "RegistrationDate", "Moderator", "Inventory", "CareInventory", "Coins", "badgeLevel");
 		$igloo = array("Furniture", "Floors", "Igloos", "Locations");
 		
 		$columns = array_merge($clothing, $player, $igloo);
@@ -305,9 +342,12 @@ class Penguin {
 		
 		$this->age = floor((strtotime("NOW") - $playerArray["RegistrationDate"]) / 86400); 
 		$this->membershipDays = $this->age;
+		$this->badgeLevel = $playerArray["badgeLevel"];
 		
 		$this->avatar = $playerArray["Avatar"];
 		$this->avatarAttributes = $playerArray["AvatarAttributes"];
+		
+		$this->nickname = $playerArray["Nickname"];
 		
 		$this->coins = $playerArray["Coins"];
 		$this->moderator = (boolean)$playerArray["Moderator"];
@@ -326,13 +366,13 @@ class Penguin {
 			$puffle = $this->database->getPuffleColumns($playerArray["Walking"], array("Type", "Subtype", "Hat"));
 			$this->walkingPuffle = array_values($puffle);
 			array_unshift($this->walkingPuffle, $playerArray["Walking"]);
-		}	
+      }
 	}
 	
 	public function getPlayerString() {
 		$player = array(
 			$this->id,
-			$this->username,
+			$this->nickname,
 			45,
 			$this->color,
 			$this->head,
@@ -347,7 +387,7 @@ class Penguin {
 			$this->y,
 			$this->frame,
 			1,
-			$this->membershipDays,
+			146 * $this->badgeLevel,
 			$this->avatar,
 			$this->avatarAttributes
 		);
@@ -355,6 +395,7 @@ class Penguin {
 		if(!empty($this->walkingPuffle)) {
 			list($id, $type, $subtype, $hat) = $this->walkingPuffle;
 			array_push($player, $id, $type, $subtype, $hat, 0);
+			
 		}
 		
 		return implode('|', $player);
