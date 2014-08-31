@@ -68,34 +68,34 @@ final class Commands extends Plugin {
 	}
 
 	public function handleGlobal($penguin, $arrData) {
-	if($penguin->moderator){
-		unset($arrData[0]);
-		$message = Packet::$Data[3];
-		$messageParts = explode(" ", $message);
-		$arguments = array_splice($messageParts, 1);
-		$message = implode(" ", $arguments);
-		$penguin->room->send("%xt%cerror%-1%$message%Server%");
+		if($penguin->moderator){
+			unset($arrData[0]);
+			$message = Packet::$Data[3];
+			$messageParts = explode(" ", $message);
+			$arguments = array_splice($messageParts, 1);
+			$message = implode(" ", $arguments);
+			$penguin->room->send("%xt%cerror%-1%$message%Server%");
 		} else if(!$penguin->moderator) {
-		$penguin->send("%xt%cerror%-1%You do not have permission to perform this action.%Hack Attempt%");
-		$this->server->joinRoom($penguin, 100);
+			$penguin->send("%xt%cerror%-1%You do not have permission to perform this action.%Hack Attempt%");
+			$this->server->joinRoom($penguin, 100);
 		}
-            }
+        }
     
-	    public function handleChangeNick($penguin, $arguments)
-	    {
-	    $blockedNicks = array("", "", "", "", "", "");
-	    if(!in_array($blockedNicks, $arguments)) {
-	    if($penguin->moderator){
-	    list($newNick) = $arguments;
-	    $penguin->updateNick($newNick);
-	    $this->server->joinRoom($penguin, 100);
-	    } else {
-	    $penguin->room->send("%xt%cerror%-1%You do not have permission to perform that action.%Hack Attempt%");
-	    }
-	    } else {
-	    $penguin->room->send("%xt%cerror%-1%You do not have permission to perform that action.%Hack Attempt%");
-	    }
-	    }
+	public function handleChangeNick($penguin, $arguments)
+	{
+		$blockedNicks = array("", "", "", "", "", "");
+		if(!in_array($blockedNicks, $arguments)) {
+			if($penguin->moderator){
+				list($newNick) = $arguments;
+				$penguin->updateNick($newNick);
+				$this->server->joinRoom($penguin, 100);
+			} else {
+				$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Hack Attempt%");
+			}
+		} else {
+			$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Hack Attempt%");
+		}
+	}
 
 	private function getID($tarID, $socket)
 	{
