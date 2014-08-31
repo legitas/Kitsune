@@ -372,6 +372,7 @@ class Penguin {
 	public function getPlayerString() {
 		$player = array(
 			$this->id,
+			$this->username,
 			$this->nickname,
 			45,
 			$this->color,
