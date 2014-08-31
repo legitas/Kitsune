@@ -13,7 +13,7 @@ final class Commands extends Plugin {
 	public $worldHandlers = array(
 		"s" => array(
 			"m#sm" => array("handlePlayerMessage", self::Both)
-		),
+		);
 	);
 	
 	public $xmlHandlers = array(null);
