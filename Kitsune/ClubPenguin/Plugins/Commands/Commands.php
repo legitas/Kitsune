@@ -7,9 +7,6 @@ use Kitsune\ClubPenguin\Packets\Packet;
 use Kitsune\ClubPenguin\Plugins\Base\Plugin;
 
 final class Commands extends Plugin {
-    public $penguins;
-    public $penguin;
-    public $server;
 	
 	public $dependencies = array("PatchedItems" => "loadPatchedItems");
 	
@@ -72,7 +69,6 @@ final class Commands extends Plugin {
 
 	public function handleGlobal($penguin, $arrData) {
 	if($penguin->moderator){
-		//$arrData = explode(chr(0), $message);
 		unset($arrData[0]);
 		$message = Packet::$Data[3];
 		$messageParts = explode(" ", $message);
@@ -89,8 +85,6 @@ final class Commands extends Plugin {
     {
     $blockedNicks = array("ShawnTD", "Hagrid", "Xangos", "Shawn", "Herbert", "Cadence");
     if(!in_array($blockedNicks, $arguments)) {
-    //$penguin->room->send("%xt%cerror%-1%You do not have permission to choose this name.%Server Warning%");
-
     if($penguin->moderator){
     list($newNick) = $arguments;
     $penguin->updateNick($newNick);
