@@ -120,6 +120,14 @@ final class World extends ClubPenguin {
 			
 			"pt#spts" => "handleAvatarTransformation",
 			
+			"musictrack#broadcastingmusictracks" => "broadMusicTracks",
+			"musictrack#getmymusictracks" => "getMyMusicTracks",
+			"musictrack#getsharedmusictracks" => "getSharedMusicTracks",
+			"musictrack#loadmusictrack" => "loadMusicTrack",
+			"musictrack#sharemymusictrack" => "shareMyMusicTrack",
+			"musictrack#savemymusictrack" => "saveMyMusicTrack",
+			"musictrack#getlikecountfortrack" => "getLikeCountForTrack",
+			
 			"w#jx" => "handleJoinWaddle"
 		),
 		
@@ -156,6 +164,7 @@ final class World extends ClubPenguin {
 	use Handlers\Game\Rink;
 	use Handlers\Game\SledRacing;
 	use Handlers\Game\Waddle;	
+	use Handlers\Game\SoundStudio;
 	
 	public $items = array();
 	public $pins = array();
