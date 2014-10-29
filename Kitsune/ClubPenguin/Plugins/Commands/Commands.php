@@ -89,7 +89,7 @@ final class Commands extends Plugin {
 			if($penguin->moderator){
 				list($newNick) = $arguments;
 				$penguin->updateNick($newNick);
-				$roomId = $penguin->room->internalId
+				$roomId = $penguin->room->internalId;
 				$this->server->joinRoom($penguin, $roomId);
 			} else {
 				$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Hack Attempt%");
