@@ -299,6 +299,17 @@ final class World extends ClubPenguin {
 		return null;
 	}
 
+	public function getPlayerByName($playerUsername) {
+        $playerUsername = strtolower($playerUsername);
+        foreach($this->penguins as $penguin) {
+                if(strtolower($penguin->username) == $playerUsername) {
+                        return $penguin;
+                }
+        }
+        return null;
+}
+
+
 	protected function handleLogin($socket) {
 		$penguin = $this->penguins[$socket];
 		$rawPlayerString = Packet::$Data['body']['login']['nick'];
