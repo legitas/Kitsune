@@ -18,7 +18,6 @@ final class Commands extends Plugin {
 	
 	public $xmlHandlers = array(null);
 	
-	
 	private $commandPrefixes = array("!", "/", ":", "@");
 	
 	private $commands = array(
@@ -30,14 +29,16 @@ final class Commands extends Plugin {
 		"COINS" => "handleCoinsAnimation",
 		"AF" => "buyFurn",
 		"AC" => "addCoins",
-		"HEAD" => "handleUpdateHead",
-		"FACE" => "handleUpdateFace",
-		"NECK" => "handleUpdateNeck",
-		"HAND" => "handleUpdateHand",
-		"BODY" => "handleUpdateBody",
-		"FEET" => "handleUpdateFeet",
-		"BACKGROUND" => "handleUpdatePhoto",
-		"PIN" => "handleUpdateFlag",
+		"COLOR" => "updateColor",
+		"HEAD" => "updateHead",
+		"FACE" => "updateFace",
+		"SUMMON" => "summonPenguin",
+		"NECK" => "updateNeck",
+		"BODY" => "updateBody",
+		"HAND" => "updateHand",
+		"FEET" => "updateFeet",
+		"BACKGROUND" => "updatePhoto",
+		"PIN" => "updateFlag",
 		"UP" => "handleMascotUpdate",
 		"MASCOT" => "handleMascotUpdate",
 		"NICK" => "handleChangeNick",
@@ -88,7 +89,8 @@ final class Commands extends Plugin {
 			if($penguin->moderator){
 				list($newNick) = $arguments;
 				$penguin->updateNick($newNick);
-				$this->server->joinRoom($penguin, 100);
+				$roomId = $penguin->room->internalId
+				$this->server->joinRoom($penguin, $roomId);
 			} else {
 				$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Hack Attempt%");
 			}
@@ -97,13 +99,9 @@ final class Commands extends Plugin {
 		}
 	}
 
-	private function getID($tarID, $socket)
+	private function getID($penguin)
 	{
-		$penguin = $this->penguins[$socket];
-		$playerId = Packet::$Data[2];
-
-		if(is_numeric($playerId)) {
-			$tarID->send("%xt%cerror%-1%Your ID is: {$playerId}%Server%");
+		$penguin->send("%xt%cprompt%-1%{$penguin->username}: Your penguin ID is {$penguin->id}.%");
 		}
 	}
 	
@@ -112,10 +110,9 @@ final class Commands extends Plugin {
 		$tarPlay->send("%xt%cerror%-1%Pong%Server%");
 	}
 	
-	public function handleMyRoom($tarPlay, $penguin)
+	public function handleMyRoom($penguin)
 	{
-	    $myRoom = Packet::$Data[3];
-		$tarPlay->send("%xt%cerror%-1%You're in room ID: {$penguin->room->externalId}%Server%");
+	   $penguin->send("%xt%cprompt%-1%The ID of the room you're in is {$penguin->room->externalId}%");
 	}
 
 	
@@ -126,16 +123,9 @@ final class Commands extends Plugin {
 		$this->patchedItems->handleBuyInventory($penguin, $itemId);
 	}
 	
-  	public function buyFurn($penguin, $arguments) 
-  	{
-		list($furnitureId) = $arguments;
-
-	    $cost = $this->furniture[$furnitureId];
-		if($penguin->coins < $cost) {
-			return $penguin->send("%xt%e%-1%401%");
-		} else {
-			$penguin->buyFurniture($furnitureId, $cost);
-		}
+  	public function buyFurn($penguin, $arguments) {
+	list($furnId) = $arguments;
+        $penguin->buyFurniture($furnId, $cost = 0);
 	}
 
    private function summonPenguin($penguin, $arguments) {
@@ -174,60 +164,49 @@ final class Commands extends Plugin {
 		$penguin->room->send("%xt%puffledig%{$penguin->room->internalId}%{$penguin->id}%$puffleId%0%0%$amount%{$penguin->puffleQuest['firstDig']}%false%");
 	}
 	
-	private function handleUpdateHead($penguin, $arguments)
-	{
-		list($itemId) = $arguments;
-		
-		$penguin->room->send("%xt%uph%{$penguin->room->internalId}%{$penguin->id}%$itemId%");
+	public function updateColor($penguin, $arguments){
+	list($itemId) = $arguments;
+	$penguin->updateColor($itemId);
 	}
 	
-	private function handleUpdateFace($penguin, $arguments)
-	{
-		list($itemId) = $arguments;
-		
-		$penguin->room->send("%xt%upf%{$penguin->room->internalId}%{$penguin->id}%$itemId%");
+	public function updateHead($penguin, $arguments){
+	list($itemId) = $arguments;
+	$penguin->updateHead($itemId);
 	}
 	
-	private function handleUpdateNeck($penguin, $arguments)
-	{
-		list($itemId) = $arguments;
-		
-		$penguin->room->send("%xt%upn%{$penguin->room->internalId}%{$penguin->id}%$itemId%");
+	public function updateFace($penguin, $arguments){
+	list($itemId) = $arguments;
+	$penguin->updateFace($itemId);
 	}
 	
-	private function handleUpdateBody($penguin, $arguments)
-	{
-		list($itemId) = $arguments;
-		
-		$penguin->room->send("%xt%upb%{$penguin->room->internalId}%{$penguin->id}%$itemId%");
+	public function updateNeck($penguin, $arguments){
+	list($itemId) = $arguments;
+	$penguin->updateNeck($itemId);
 	}
 	
-	private function handleUpdateHand($penguin, $arguments)
-	{
-		list($itemId) = $arguments;
-		
-		$penguin->room->send("%xt%upa%{$penguin->room->internalId}%{$penguin->id}%$itemId%");
+	public function updateBody($penguin, $arguments){
+	list($itemId) = $arguments;
+	$penguin->updateBody($itemId);
 	}
 	
-	private function handleUpdateFeet($penguin, $arguments)
-	{
-		list($itemId) = $arguments;
-		
-		$penguin->room->send("%xt%upe%{$penguin->room->internalId}%{$penguin->id}%$itemId%");
-	}
-
-	private function handleUpdatePhoto($penguin, $arguments)
-	{
-		list($itemId) = $arguments;
-		
-		$penguin->room->send("%xt%upp%{$penguin->room->internalId}%{$penguin->id}%$itemId%");
+	public function updateHand($penguin, $arguments){
+	list($itemId) = $arguments;
+	$penguin->updateHand($itemId);
 	}
 	
-	private function handleUpdateFlag($penguin, $arguments)
-	{
-		list($itemId) = $arguments;
-		
-		$penguin->room->send("%xt%upl%{$penguin->room->internalId}%{$penguin->id}%$itemId%");
+	public function updateFeet($penguin, $arguments){
+	list($itemId) = $arguments;
+	$penguin->updateFeet($itemId);
+	}
+	
+	public function updatePhoto($penguin, $arguments){
+	list($itemId) = $arguments;
+	$penguin->updatePhoto($itemId);
+	}
+	
+	public function updateFlag($penguin, $arguments){
+	list($itemId) = $arguments;
+	$penguin->updateFlag($itemId);
 	}
 		
 	private function handleMascotUpdate($penguin, $arguments)
@@ -243,9 +222,9 @@ final class Commands extends Plugin {
   	  $penguin->mascotItemUpdate("4", "460", "0", "0", "0", "0", "0");
   	  break;
   	  
-  	  case 'gary':
+  	  case 'gary': 
   	  case 'g':
-  	  $this->server->joinRoom($penguin, 120);
+  	  $this->server->joinRoom($penguin, 120); // ?????? This isn't even an update
   	  break;
   	  
   	  case 'olaf':
