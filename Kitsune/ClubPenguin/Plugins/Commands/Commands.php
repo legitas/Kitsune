@@ -102,7 +102,6 @@ final class Commands extends Plugin {
 	private function getID($penguin)
 	{
 		$penguin->send("%xt%cprompt%-1%{$penguin->username}: Your penguin ID is {$penguin->id}.%");
-		}
 	}
 	
 	public function handlePing($tarPlay)
