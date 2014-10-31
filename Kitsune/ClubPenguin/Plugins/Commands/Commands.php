@@ -53,43 +53,36 @@ final class Commands extends Plugin {
 	
 	private $patchedItems;
 	
-	public function __construct($server)
-	{
+	public function __construct($server){
 		$this->server = $server;
 	}
 	
-	public function onReady()
-	{
+	public function onReady(){
 		parent::__construct(__CLASS__);
 	}
 	
-	public function loadPatchedItems()
-	{
+	public function loadPatchedItems() {
 		$this->patchedItems = $this->server->loadedPlugins["PatchedItems"];
 	}
 
-	public function handleGlobal($penguin, $arrData) {
-		if($penguin->moderator){
-			unset($arrData[0]);
-			$message = Packet::$Data[3];
-			$messageParts = explode(" ", $message);
-			$arguments = array_splice($messageParts, 1);
+	private function handleGlobal($penguin, $arguments) {
+	if($penguin->moderator) {
+		foreach($this->server->penguins as $allPenguins) {
 			$message = implode(" ", $arguments);
-			$penguin->room->send("%xt%cerror%-1%$message%Server%");
-		} else if(!$penguin->moderator) {
-			$penguin->send("%xt%cerror%-1%You do not have permission to perform this action.%Hack Attempt%");
-			$this->server->joinRoom($penguin, 100);
+			$allPenguins->send("%xt%cprompt%-1%$message%");
 		}
-        }
+	} else {
+		$penguin->send("%xt%cerror%-1%You don't have permission to perform that action%Error%");
+		}
+	}
     
-	public function handleChangeNick($penguin, $arguments)
-	{
+	public function handleChangeNick($penguin, $arguments) {
 		$blockedNicks = array("", "", "", "", "", "");
 		if(!in_array($blockedNicks, $arguments)) {
 			if($penguin->moderator){
 				list($newNick) = $arguments;
 				$penguin->updateNick($newNick);
-				$roomId = $penguin->room->internalId;
+				$roomId = $penguin->room->externalId;
 				$this->server->joinRoom($penguin, $roomId);
 			} else {
 				$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Hack Attempt%");
@@ -99,26 +92,20 @@ final class Commands extends Plugin {
 		}
 	}
 
-	private function getID($penguin)
-	{
+	private function getID($penguin) {
 		$penguin->send("%xt%cprompt%-1%{$penguin->username}: Your penguin ID is {$penguin->id}.%");
 	}
 	
-	public function handlePing($tarPlay)
-	{
-		$tarPlay->send("%xt%cerror%-1%Pong%Server%");
+	public function handlePing($penguin) {
+		$penguin->send("%xt%cerror%-1%Pong%Server%");
 	}
 	
-	public function handleMyRoom($penguin)
-	{
+	public function handleMyRoom($penguin) {
 	   $penguin->send("%xt%cprompt%-1%The ID of the room you're in is {$penguin->room->externalId}%");
 	}
-
 	
-  	public function buyItem($penguin, $arguments)
-  	{
+  	public function buyItem($penguin, $arguments) {
 		list($itemId) = $arguments;
-		
 		$this->patchedItems->handleBuyInventory($penguin, $itemId);
 	}
 	
@@ -127,94 +114,87 @@ final class Commands extends Plugin {
         $penguin->buyFurniture($furnId, $cost = 0);
 	}
 
-   private function summonPenguin($penguin, $arguments) {
+   	private function summonPenguin($penguin, $arguments) {
                 if($penguin->moderator) {
                         list($username) = $arguments;
-                       
                         $username = strtolower($username);
-                       
                         foreach($this->server->penguins as $aPenguin) {
                                 if(strtolower($aPenguin->username) == $username) {
                                         $this->server->joinRoom($aPenguin, $penguin->room->externalId);
-                                       
                                         break;
                                 }
                         }
                 }
         }
-		 private function usersOnline($penguin, $arguments) {
+	
+	private function usersOnline($penguin, $arguments) {
                 $userCount = count($this->server->penguins);
-               
                 $penguin->send("%xt%cerror%-1%There are $userCount user(s) online!%Users%");
         }
  
-  	private function addCoins($penguin, $arguments)
-  	{
+  	private function addCoins($penguin, $arguments) {
 		list($amount) = $arguments;
-		
 		$penguin->send("%xt%zo%{$penguin->room->internalId}%{$penguin->coins}%%0%0%0%");
 		$penguin->setCoins($penguin->coins + $amount);
 		$penguin->getPlayerString();
 	}
 
-	public function handleCoinsAnimation($penguin, $arguments)
-	{
+	public function handleCoinsAnimation($penguin, $arguments) {
 	    list($amount) = $arguments;
 		$penguin->room->send("%xt%puffledig%{$penguin->room->internalId}%{$penguin->id}%$puffleId%0%0%$amount%{$penguin->puffleQuest['firstDig']}%false%");
 	}
 	
-	public function updateColor($penguin, $arguments){
+	public function updateColor($penguin, $arguments) {
 	list($itemId) = $arguments;
 	$penguin->updateColor($itemId);
 	}
 	
-	public function updateHead($penguin, $arguments){
+	public function updateHead($penguin, $arguments) {
 	list($itemId) = $arguments;
 	$penguin->updateHead($itemId);
 	}
 	
-	public function updateFace($penguin, $arguments){
+	public function updateFace($penguin, $arguments) {
 	list($itemId) = $arguments;
 	$penguin->updateFace($itemId);
 	}
 	
-	public function updateNeck($penguin, $arguments){
+	public function updateNeck($penguin, $arguments) {
 	list($itemId) = $arguments;
 	$penguin->updateNeck($itemId);
 	}
 	
-	public function updateBody($penguin, $arguments){
+	public function updateBody($penguin, $arguments) {
 	list($itemId) = $arguments;
 	$penguin->updateBody($itemId);
 	}
 	
-	public function updateHand($penguin, $arguments){
+	public function updateHand($penguin, $arguments) {
 	list($itemId) = $arguments;
 	$penguin->updateHand($itemId);
 	}
 	
-	public function updateFeet($penguin, $arguments){
+	public function updateFeet($penguin, $arguments) {
 	list($itemId) = $arguments;
 	$penguin->updateFeet($itemId);
-	}
+	} 
 	
-	public function updatePhoto($penguin, $arguments){
+	public function updatePhoto($penguin, $arguments) {
 	list($itemId) = $arguments;
 	$penguin->updatePhoto($itemId);
 	}
 	
-	public function updateFlag($penguin, $arguments){
+	public function updateFlag($penguin, $arguments) {
 	list($itemId) = $arguments;
 	$penguin->updateFlag($itemId);
 	}
-		
-	private function handleMascotUpdate($penguin, $arguments)
-	{
+	
+	private function handleMascotUpdate($penguin, $arguments) {
 	list($mascot) = $arguments;
-	switch($mascot){
+	switch($mascot) {
 	 case 'cadence':
 	 case 'ca':
-      $penguin->mascotItemUpdate("10", "1032", "0", "3011", "5023", "1033", "0");
+	  $penguin->mascotItemUpdate("10", "1032", "0", "3011", "5023", "1033", "0");
   	  break;
   	  
   	  case 'goldnigga':
@@ -237,22 +217,19 @@ final class Commands extends Plugin {
 		}
 	}
 	
-	private function handleAvatarTransform($penguin, $arguments)
-	{
+	private function handleAvatarTransform($penguin, $arguments) {
 	 list($transformation) = $arguments;
 	 $penguin->handleTransformCommand($transformation);
 	}
 
-	private function handleTeleport($penguin, $arguments)
-	{
+	private function handleTeleport($penguin, $arguments) {
 		list($roomName) = $arguments;
-		
-		switch($roomName)
-		{
+		switch($roomName) {
+			
 		  case 'town':
 		  $roomId = 100;
 		  break;
-		  
+		 
 		  case 'dance':
 		  case 'dance club':
 		  case 'night club':
@@ -273,29 +250,20 @@ final class Commands extends Plugin {
 		$this->server->joinRoom($penguin, $roomId);
 	}
 
-
-	private function joinRoom($penguin, $arguments)
-	{
+	private function joinRoom($penguin, $arguments) {
 		list($roomId) = $arguments;
-		
 		$this->server->joinRoom($penguin, $roomId);
 	}
-
 	
-	protected function handlePlayerMessage($penguin)
-	{
+	protected function handlePlayerMessage($penguin) {
 		$message = Packet::$Data[3];
-		
 		$firstCharacter = substr($message, 0, 1);
 		if(in_array($firstCharacter, $this->commandPrefixes)) {
 			$messageParts = explode(" ", $message);
-			
 			$command = $messageParts[0];
 			$command = substr($command, 1);
 			$command = strtoupper($command);
-			
 			$arguments = array_splice($messageParts, 1);
-			
 			if(isset($this->commands[$command])) {
 				if(in_array($penguin, $this->mutedPenguins)) {
 					$penguin->muted = false;
