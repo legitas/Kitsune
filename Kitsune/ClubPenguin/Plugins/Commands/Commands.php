@@ -85,6 +85,8 @@ final class Commands extends Plugin {
 			} else {
 			$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Error%");
 			}
+		} else {
+		$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Error%");
 		}
 	}
 
