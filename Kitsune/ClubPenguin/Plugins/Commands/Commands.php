@@ -44,7 +44,6 @@ final class Commands extends Plugin {
 		"NICK" => "handleChangeNick",
 		"ROOM" => "handleMyRoom",
 		"SUMMON" => "summonPenguin",
-		"TELEPORT" => "handleTeleport",
 		"TRANSFORM" => "handleAvatarTransform",
 		"USERS" => "usersOnline"
 	);
@@ -80,15 +79,12 @@ final class Commands extends Plugin {
 		$blockedNicks = array("", "", "", "", "", "");
 		if(!in_array($blockedNicks, $arguments)) {
 			if($penguin->moderator){
-				list($newNick) = $arguments;
-				$penguin->updateNick($newNick);
-				$roomId = $penguin->room->externalId;
-				$this->server->joinRoom($penguin, $roomId);
+			list($newNick) = $arguments;
+			$penguin->updateNick($newNick);
+			$this->server->joinRoom($penguin, $penguin->room->externalId);
 			} else {
-				$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Hack Attempt%");
+			$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Error%");
 			}
-		} else {
-			$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Hack Attempt%");
 		}
 	}
 
@@ -190,64 +186,98 @@ final class Commands extends Plugin {
 	}
 	
 	private function handleMascotUpdate($penguin, $arguments) {
-	list($mascot) = $arguments;
-	switch($mascot) {
-	 case 'cadence':
-	 case 'ca':
-	  $penguin->mascotItemUpdate("10", "1032", "0", "3011", "5023", "1033", "0");
-  	  break;
-  	  
-  	  case 'goldnigga':
-  	  $penguin->mascotItemUpdate("4", "460", "0", "0", "0", "0", "0");
-  	  break;
-  	  
-  	  case 'gary': 
-  	  case 'g':
-  	  $this->server->joinRoom($penguin, 120); // ?????? This isn't even an update
-  	  break;
-  	  
-  	  case 'olaf':
-  	  case 'snowman':
-  	  $penguin->mascotItemUpdate("4", "0", "0", "24174", "0", "0", "0");
-  	  break;
-  	  
-  	  case 'elsa':
-  	  $penguin->mascotItemUpdate("4", "1897", "0", "0", "24177", "0", "0");
-  	  break;
+		if($penguin->moderator) {
+			list($mascot) = $arguments;
+			switch($mascot)
+			{
+				case '0': // Reset
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("0", "0", "0", "0", "0", "0", "0");
+				break;
+				
+				case 'rh': // Rockhopper
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("5", "1692", "152", "161", "4946", "0", "0");
+				break;
+				
+				case 'srh': // Santa Rockhopper
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("5", "1753", "0", "0", "0", "0", "0");
+				break;
+				
+				case 'h': // Herbert
+				$penguin->handleTransformCommand(10);
+				$penguin->mascotItemUpdate("15", "0", "1737", "0", "0", "0", "0");
+				break;
+				
+				case 'sa': // Sasquach
+				$penguin->handleTransformCommand(35);
+				$penguin->mascotItemUpdate("15", "0", "0", "0", "1917", "0", "0");
+				break;
+				
+				case 'g': // Gary
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("1", "0", "2113", "0", "4022", "0", "0");
+				break;
+				
+				case 'ca': // Cadence
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("10", "1701", "0", "3011", "4955", "1034", "1033");
+				break;
+				
+				case 's': // Sensei
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("14", "1622", "2015", "4485", "0", "0", "6177");
+				break;
+				
+				case 'r': // Rookie
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("2", "1783", "2030", "0", "4365", "0", "0");
+				break;
+				
+				case 'ph': // Puffle Handler
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("9", "1384", "0", "0", "4555", "0", "0");
+				break;
+				
+				case 'aa': // Aunt Arctic
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("2", "1562", "2007", "0", "4814", "0", "0");
+				break;
+				
+				case 'ktf': // Kermit the Frog - transformation sprite doesn't work?
+				$penguin->handleTransformCommand(33);
+				$penguin->mascotItemUpdate("15", "1805", "0", "0", "0", "0", "0");
+				break;
+				
+				case 'sb': // Stompin' Bob
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("5", "1274", "0", "5105", "4383", "5106", "0");
+				break;
+				
+				case 'pk': // Petey K
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("2", "1273", "2034", "3082", "4381", "0", "6078");
+				break;
+				
+				case 'gb': // G Billy
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("1", "1275", "0", "0", "4384", "5107", "6080");
+				break;
+				
+				case 'fr': // Franky
+				$penguin->handleTransformCommand(0);
+				$penguin->mascotItemUpdate("7", "0", "0", "0", "4382", "0", "6079");
+				break;
+			}
+		} else {
+			$penguin->send("%xt%cerror%-1%You do not have permission to perform that action.%Error%");
 		}
 	}
 	
 	private function handleAvatarTransform($penguin, $arguments) {
 	 list($transformation) = $arguments;
 	 $penguin->handleTransformCommand($transformation);
-	}
-
-	private function handleTeleport($penguin, $arguments) {
-		list($roomName) = $arguments;
-		switch($roomName) {
-			
-		  case 'town':
-		  $roomId = 100;
-		  break;
-		 
-		  case 'dance':
-		  case 'dance club':
-		  case 'night club':
-		  $roomId = 120;
-		  break;
-		  
-		  case 'coffee':
-		  case 'coffee shop':
-		  $roomId = 110;
-		  break;
-		  
-		  case 'book':
-		  case 'book room':
-		  $roomId = 111;
-		  break;
-		}
-		
-		$this->server->joinRoom($penguin, $roomId);
 	}
 
 	private function joinRoom($penguin, $arguments) {
