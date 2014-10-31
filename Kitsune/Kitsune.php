@@ -8,7 +8,7 @@ use Kitsune\ClubPenguin\Packets\Packet;
 
 abstract class Kitsune extends Spirit {
 
-	protected $penguins = array();
+	public $penguins = array();
 	
 	protected function handleAccept($socket) {
 		$newPenguin = new Penguin($socket);
