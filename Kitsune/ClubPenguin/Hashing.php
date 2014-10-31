@@ -4,7 +4,7 @@ namespace Kitsune\ClubPenguin;
 
 final class Hashing {
 
-	private static $characterSet = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789`~!@#$%^&*()_+-={}|[]\:\"',./?";
+	private static $characterSet = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789`~@#$()_+-={}|[]:,.";
 	
 	public static function generateRandomKey() {
 		$keyLength = mt_rand(7, 10);
