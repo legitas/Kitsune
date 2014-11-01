@@ -79,7 +79,7 @@ final class Commands extends Plugin {
 		$blockedNicks = array("", "", "", "", "", "");
 		if(!in_array($blockedNicks, $arguments)) {
 			if($penguin->moderator){
-			list($newNick) = $arguments;
+			$newNick = implode(" ", $arguments);
 			$penguin->updateNick($newNick);
 			$this->server->joinRoom($penguin, $penguin->room->externalId);
 			} else {
