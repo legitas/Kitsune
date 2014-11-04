@@ -239,7 +239,7 @@ abstract class ClubPenguin extends Kitsune\Kitsune {
 	}
 	
 	protected function handleWorldPacket($socket) {
-		if($this->penguins[$socket]->identified == true) {
+		if($this->penguins[$socket]->identified == true || Packet::$Handler == "p#getdigcooldown") {
 			$worldPacket = Packet::GetInstance();
 			
 			$penguin = $this->penguins[$socket];
