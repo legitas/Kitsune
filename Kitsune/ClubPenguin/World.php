@@ -120,7 +120,11 @@ final class World extends ClubPenguin {
 			
 			"pt#spts" => "handleAvatarTransformation",
 			
-			"w#jx" => "handleJoinWaddle"
+			"w#jx" => "handleJoinWaddle",
+			
+			"a#gt" => "handleGetTablePopulation",
+			"a#jt" => "handleJoinTable",
+			"a#lt" => "handleLeaveTable"
 		),
 		
 		"z" => array(
@@ -153,8 +157,7 @@ final class World extends ClubPenguin {
 	use Handlers\Play\PlayerTransformation;
 	
 	use Handlers\Game\General;
-	use Handlers\Game\Rink;
-	use Handlers\Game\SledRacing;
+	use Handlers\Game\Multiplayer;
 	use Handlers\Game\Waddle;	
 	
 	public $items = array();
