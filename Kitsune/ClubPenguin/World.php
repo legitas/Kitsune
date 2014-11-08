@@ -291,6 +291,14 @@ final class World extends ClubPenguin {
 			
 			unset($careItems[$careId]);
 		}
+
+		$tableIds = range(200, 207);
+		$emptyTable = array();
+
+		$this->tablePopulationById = array_fill_keys($tableIds, $emptyTable);
+		$this->playersByTableId = array_fill_keys($tableIds, $emptyTable);
+		$this->sepctatorsByTableId = array_fill_keys($tableIds, $emptyTable);
+		$this->gamesByTableId = array_fill_keys($tableIds, null);
 		
 		Logger::Fine("World server is online");
 	}
