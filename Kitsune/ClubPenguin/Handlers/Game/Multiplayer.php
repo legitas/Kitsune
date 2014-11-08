@@ -2,6 +2,7 @@
 
 namespace Kitsune\ClubPenguin\Handlers\Game;
 
+use Kitsune\Logging\Logger;
 use Kitsune\ClubPenguin\Packets\Packet;
 
 use Kitsune\ClubPenguin\Handlers\Game\FindFour;
@@ -10,6 +11,7 @@ trait Multiplayer {
 
 	public $tablePopulationById = array(205 => array(), 206 => array(), 207 => array());
 	public $playersByTableId = array(205 => array(), 206 => array(), 207 => array());
+	public $sepctatorsByTableId = array(205 => array(), 206 => array(), 207 => array());
 
 	public $gamesByTableId = array(205 => null, 206 => null, 207 => null);
 	
@@ -20,35 +22,45 @@ trait Multiplayer {
 		
 		$tableId = Packet::$Data[2];
 		
-		if(count($this->tablePopulationById[$tableId]) == 2) { // This is temporary ?
-			return;
-		} else {
+		if(count($this->tablePopulationById[$tableId]) >= 2) { // Add to sepctator array
+			$sepctatorCount = count($this->sepctatorsByTableId[$tableId]);
+
+			if(!$sepctatorCount > 5) { // Limit is 5
+				$this->sepctatorsByTableId[$tableId][] = $penguin;
+
+				$penguin->tableId = $tableId;
+
+				Logger::Debug("Spectator added to table $tableId");
+			} else {
+				return;
+			}
+		} else { // Player
 			$seatId = count($this->tablePopulationById[$tableId]);
 			
-			if(empty($this->gamesByTableId[$tableId])) {
+			if($this->gamesByTableId[$tableId] === null) {
 				$findFourGame = new FindFour();
 				$findFourGame->addPlayer($penguin);
 
 				$this->gamesByTableId[$tableId] = $findFourGame;
 			} else {
-				// TODO: Spectator MODE - remember!!
 				$this->gamesByTableId[$tableId]->addPlayer($penguin);
 			}
 
 			$this->tablePopulationById[$tableId][$penguin->username] = $penguin;
 
-			$seatId += 1; // Don't ask me why plz
+			$seatId += 1;
 
 			$penguin->send("%xt%jt%{$penguin->room->internalId}%$tableId%$seatId%");
 
 			$penguin->room->send("%xt%ut%{$penguin->room->internalId}%$tableId%$seatId%");
 			
-			$this->playersByTableId[$tableId][] = $penguin; // May not always happen?
+			$this->playersByTableId[$tableId][] = $penguin;
 			
 			$penguin->tableId = $tableId;
 		}
 	}
 	
+	// TODO: Check if they're in the Ski Lodge or Attic before sending them the packet
 	protected function handleGetTablePopulation($socket) {
 		$penguin = $this->penguins[$socket];
 		
@@ -66,6 +78,11 @@ trait Multiplayer {
 		$penguin->send("%xt%gt%{$penguin->room->internalId}%$tablePopulation");
 	}
 
+
+	protected function handleQuitGame($socket) {
+		// Not sure if it needs implementing
+	}
+
 	protected function handleLeaveTable($socket) {
 		$penguin = $this->penguins[$socket];
 
@@ -73,12 +90,30 @@ trait Multiplayer {
 
 		if($tableId !== null) {
 			$seatId = array_search($penguin, $this->playersByTableId[$tableId]);
+			
+			$opponentSeatId = $seatId == 0 ? 1 : 0;
+
+			if(isset($this->playersByTableId[$tableId][$opponentSeatId])) {
+				$this->playersByTableId[$tableId][$opponentSeatId]->addCoins(10);
+			}
 
 			unset($this->playersByTableId[$tableId][$seatId]);
+			unset($this->tablePopulationById[$tableId][$penguin->username]);
 
 			$penguin->room->send("%xt%ut%{$penguin->room->internalId}%$tableId%$seatId%");
 
 			$penguin->tableId = null;
+
+			if(count($this->playersByTableId[$tableId]) == 0) {
+				$this->playersByTableId[$tableId] = array();
+				$this->gamesByTableId[$tableId] = null;
+
+				foreach($this->sepctatorsByTableId[$tableId] as $spectatorId => $sepctator) {			
+					$sepctator->tableId = null;
+				}
+
+				$this->sepctatorsByTableId[$tableId] = array();
+			}
 		}
 	}
 	
@@ -87,6 +122,7 @@ trait Multiplayer {
 		
 		if($penguin->waddleRoom !== null) {
 			$waddlePlayers = array();
+
 			foreach($penguin->room->penguins as $waddlePenguin) {
 				array_push($waddlePlayers, sprintf("%s|%d|%d|%s", $waddlePenguin->username, $waddlePenguin->color, $waddlePenguin->hand, $waddlePenguin->username));
 			}
@@ -106,12 +142,6 @@ trait Multiplayer {
 		}
 	}
 
-	public function resetTable($tableId) {
-		$this->tablePopulationById[$tableId] = array();
-
-		$this->gamesByTableId[$tableId] = null;
-	}
-
 	protected function handleSendMove($socket) {
 		$penguin = $this->penguins[$socket];
 		
@@ -120,44 +150,53 @@ trait Multiplayer {
 			
 			$penguin->room->send("%xt%zm%" . implode('%', Packet::$Data) . '%');
 		} elseif($penguin->tableId !== null) {
-			$chipColumn = Packet::$Data[2];
-			$chipRow = Packet::$Data[3];
-
 			$tableId = $penguin->tableId;
-			$seatId = array_search($penguin, $this->playersByTableId[$tableId]);
-			
-			$gameStatus = $this->gamesByTableId[$tableId]->placeChip($chipColumn, $chipRow);
-			
-			foreach($this->playersByTableId[$tableId] as $player) {
-				$player->send("%xt%zm%{$player->room->internalId}%$seatId%$chipColumn%$chipRow%");
-			}
 
-			$opponentSeatId = $seatId == 0 ? 1 : 0;
+			if(in_array($penguin, $this->playersByTableId[$tableId]) && $this->gamesByTableId[$tableId]->ready() === true) {
+				$chipColumn = Packet::$Data[2];
+				$chipRow = Packet::$Data[3];
+				$seatId = array_search($penguin, $this->playersByTableId[$tableId]);
+				$libraryId = $seatId + 1;
 
-			if($gameStatus === FindFour::FoundFour) {
-				$penguin->addCoins(10);
+				if($this->gamesByTableId[$tableId]->currentPlayer === $libraryId) {	// Prevents player from placing multiple chips on a single turn
+					$gameStatus = $this->gamesByTableId[$tableId]->placeChip($chipColumn, $chipRow);
 
-				$this->playersByTableId[$tableId][$opponentSeatId]->addCoins(5);
+					$recipients = array_merge($this->playersByTableId[$tableId], $this->sepctatorsByTableId[$tableId]);
+					
+					foreach($recipients as $recipient) {
+						$recipient->send("%xt%zm%{$recipient->room->internalId}%$seatId%$chipColumn%$chipRow%");
+					}
 
-				$this->resetTable($tableId);
-			} elseif($gameStatus === FindFour::Tie) {
-				$penguin->addCoins(10);
+					$opponentSeatId = $seatId == 0 ? 1 : 0;
 
-				$this->playersByTableId[$tableId][$opponentSeatId]->addCoins(10);
+					if($gameStatus === FindFour::FoundFour) {
+						$penguin->addCoins(10);
 
-				$this->resetTable($tableId);
+						$this->playersByTableId[$tableId][$opponentSeatId]->addCoins(5);
+					} elseif($gameStatus === FindFour::Tie) {
+						$penguin->addCoins(10);
+
+						$this->playersByTableId[$tableId][$opponentSeatId]->addCoins(10);
+					}
+				} else {
+					Logger::Warn("Attempted to drop multiple chips");
+				}
+			} else {
+				Logger::Warn("Player {$penguin->id} tried dropping a chip before connecting to a player!");
 			}
 		}
 	}
 	
 	protected function handleGameMove($socket) {
 		$penguin = $this->penguins[$socket];
-		
-		$this->rinkPuck = array_splice(Packet::$Data, 3);
-		
-		$puckData = implode('%', $this->rinkPuck);
-		
-		$penguin->send("%xt%zm%{$penguin->room->internalId}%{$penguin->id}%$puckData%");
+
+		if($penguin->room->externalId == 802) {
+			$this->rinkPuck = array_splice(Packet::$Data, 3);
+			
+			$puckData = implode('%', $this->rinkPuck);
+			
+			$penguin->send("%xt%zm%{$penguin->room->internalId}%{$penguin->id}%$puckData%");
+		}
 	}
 	
 	protected function handleGetGame($socket) {
@@ -167,7 +206,7 @@ trait Multiplayer {
 			$puckData = implode('%', $this->rinkPuck);
 		
 			$penguin->send("%xt%gz%{$penguin->room->internalId}%$puckData%");
-		} else {
+		} elseif($penguin->tableId !== null) {
 			$tableId = $penguin->tableId;
 			$playerUsernames = array_keys($this->tablePopulationById[$tableId]);
 			
