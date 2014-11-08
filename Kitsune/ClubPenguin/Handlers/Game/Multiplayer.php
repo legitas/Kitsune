@@ -72,14 +72,7 @@ trait Multiplayer {
 		$penguin->send("%xt%gt%{$penguin->room->internalId}%$tablePopulation");
 	}
 
-
-	protected function handleQuitGame($socket) {
-		// Not sure if it needs implementing
-	}
-
-	protected function handleLeaveTable($socket) {
-		$penguin = $this->penguins[$socket];
-
+	public function leaveTable($penguin) {
 		$tableId = $penguin->tableId;
 
 		if($tableId !== null) {
@@ -109,6 +102,16 @@ trait Multiplayer {
 				$this->sepctatorsByTableId[$tableId] = array();
 			}
 		}
+	}
+
+	protected function handleQuitGame($socket) {
+		// Not sure if it needs implementing
+	}
+
+	protected function handleLeaveTable($socket) {
+		$penguin = $this->penguins[$socket];
+
+		$this->leaveTable($penguin);
 	}
 	
 	protected function handleStartGame($socket) {
