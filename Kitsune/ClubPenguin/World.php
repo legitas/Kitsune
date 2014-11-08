@@ -299,7 +299,7 @@ final class World extends ClubPenguin {
 		$this->playersByTableId = array_fill_keys($tableIds, $emptyTable);
 		$this->sepctatorsByTableId = array_fill_keys($tableIds, $emptyTable);
 		$this->gamesByTableId = array_fill_keys($tableIds, null);
-		
+
 		Logger::Fine("World server is online");
 	}
 	
@@ -347,7 +347,9 @@ final class World extends ClubPenguin {
 	}
 	
 	protected function removePenguin($penguin) {
-		$this->removeClient($penguin->socket);
+		if(isset($this->sockets[$penguin->socket])) {
+			$this->removeClient($penguin->socket);
+		}
 
 		if($penguin->room !== null) {
 			$penguin->room->remove($penguin);
@@ -369,16 +371,7 @@ final class World extends ClubPenguin {
 	protected function handleDisconnect($socket) {
 		$penguin = $this->penguins[$socket];
 
-		if($penguin->room !== null) {
-			$penguin->room->remove($penguin);
-		}
-		
-		if(isset($this->penguinsById[$penguin->id])) {
-			$this->leaveWaddle($penguin);
-			unset($this->penguinsById[$penguin->id]);
-		}
-
-		unset($this->penguins[$socket]);
+		$this->removePenguin($penguin);
 
 		Logger::Info("Player disconnected");
 	}
