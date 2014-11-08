@@ -43,6 +43,7 @@ class Penguin {
 	public $frame;
 	
 	public $tableId = null;
+
 	public $waddleRoom = null; // Not an object!
 	public $room;
 	
