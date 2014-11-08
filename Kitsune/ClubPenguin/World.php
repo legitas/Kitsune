@@ -136,6 +136,7 @@ final class World extends ClubPenguin {
 			"jw" => "handleSendJoinWaddleById",
 			"lw" => "handleLeaveWaddle",
 			"jz" => "handleStartGame",
+			"lz" => "handleQuitGame",
 			
 			"zm" => "handleSendMove"
 		)
@@ -345,7 +346,12 @@ final class World extends ClubPenguin {
 		}
 		
 		if(isset($this->penguinsById[$penguin->id])) {
-			$this->leaveWaddle($penguin);
+			if($penguin->waddleRoom !== null) {
+				$this->leaveWaddle($penguin);
+			} elseif($penguin->tableId !== null) {
+				$this->leaveTable($penguin);
+			}
+
 			unset($this->penguinsById[$penguin->id]);
 		}
 
