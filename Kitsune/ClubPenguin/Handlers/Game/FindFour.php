@@ -11,7 +11,6 @@ class FindFour {
 	const FourNotFound = 3;
 	
 	public $players = array();
-	public $spectators = array();
 
 	public $boardMap = array(
 		array(0, 0, 0, 0, 0, 0, 0),
@@ -31,7 +30,7 @@ class FindFour {
 	}
 
 	public function ready() {
-		return count($this->players) > 2;
+		return count($this->players) == 2;
 	}
 
 	public function addPlayer($penguin) {
@@ -141,19 +140,19 @@ class FindFour {
 
 			for($column = 0; $column < $columns; $column++) {
 				if($this->boardMap[$row][$column] === $currentPlayer) {
-					if($this->boardMap[$row + 1][$column + 1] === $currentPlayer &&
-						$this->boardMap[$row + 2][$column + 2] === $currentPlayer &&
-						$this->boardMap[$row + 3][$column + 3] === $currentPlayer) {
+					if(@$this->boardMap[$row + 1][$column + 1] === $currentPlayer &&
+						@$this->boardMap[$row + 2][$column + 2] === $currentPlayer &&
+						@$this->boardMap[$row + 3][$column + 3] === $currentPlayer) {
 						
 						return self::FoundFour;
-					} elseif($this->boardMap[$row - 1][$column + 1] === $currentPlayer &&
-						$this->boardMap[$row - 2][$column + 2] === $currentPlayer &&
-						$this->boardMap[$row - 3][$column + 3] === $currentPlayer) {
+					} elseif(@$this->boardMap[$row - 1][$column + 1] === $currentPlayer &&
+						@$this->boardMap[$row - 2][$column + 2] === $currentPlayer &&
+						@$this->boardMap[$row - 3][$column + 3] === $currentPlayer) {
 						
 						return self::FoundFour;
-					} elseif($this->boardMap[$row - 1][$column - 1] === $currentPlayer &&
-						$this->boardMap[$row - 2][$column - 2] === $currentPlayer &&
-						$this->boardMap[$row - 3][$column - 3] === $currentPlayer) {
+					} elseif(@$this->boardMap[$row - 1][$column - 1] === $currentPlayer &&
+						@$this->boardMap[$row - 2][$column - 2] === $currentPlayer &&
+						@$this->boardMap[$row - 3][$column - 3] === $currentPlayer) {
 						
 						return self::FoundFour;
 					}
