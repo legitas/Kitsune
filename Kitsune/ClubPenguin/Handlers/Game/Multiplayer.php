@@ -8,12 +8,6 @@ use Kitsune\ClubPenguin\Packets\Packet;
 use Kitsune\ClubPenguin\Handlers\Game\FindFour;
 
 trait Multiplayer {
-
-	public $tablePopulationById = array(205 => array(), 206 => array(), 207 => array());
-	public $playersByTableId = array(205 => array(), 206 => array(), 207 => array());
-	public $sepctatorsByTableId = array(205 => array(), 206 => array(), 207 => array());
-
-	public $gamesByTableId = array(205 => null, 206 => null, 207 => null);
 	
 	public $rinkPuck = array(0, 0, 0, 0);
 	
