@@ -147,10 +147,8 @@ trait Multiplayer {
 
 				if($this->gamesByTableId[$tableId]->currentPlayer === $libraryId) {	// Prevents player from placing multiple chips on a single turn
 					$gameStatus = $this->gamesByTableId[$tableId]->placeChip($chipColumn, $chipRow);
-
-					$recipients = array_merge($this->playersByTableId[$tableId], $this->sepctatorsByTableId[$tableId]);
 					
-					foreach($recipients as $recipient) {
+					foreach($this->playersByTableId[$tableId] as $recipient) {
 						$recipient->send("%xt%zm%{$recipient->room->internalId}%$seatId%$chipColumn%$chipRow%");
 					}
 
