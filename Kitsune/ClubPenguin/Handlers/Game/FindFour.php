@@ -9,8 +9,6 @@ class FindFour {
 	const FoundFour = 1;
 	const Tie = 2;
 	const FourNotFound = 3;
-	
-	public $players = array();
 
 	public $boardMap = array(
 		array(0, 0, 0, 0, 0, 0, 0),
@@ -27,18 +25,6 @@ class FindFour {
 		return implode(",", array_map(function($row) {
 			return implode(",", $row);
 		}, $this->boardMap));
-	}
-
-	public function ready() {
-		return count($this->players) == 2;
-	}
-
-	public function addPlayer($penguin) {
-		$this->players[] = $penguin;
-	}
-
-	public function addSpectator($penguin) {
-		$this->spectators[] = $penguin;
 	}
 
 	public function changePlayer() {
