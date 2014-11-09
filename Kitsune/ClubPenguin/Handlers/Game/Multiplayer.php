@@ -82,12 +82,6 @@ trait Multiplayer {
 			if(count($this->playersByTableId[$tableId]) == 0) {
 				$this->playersByTableId[$tableId] = array();
 				$this->gamesByTableId[$tableId] = null;
-
-				foreach($this->sepctatorsByTableId[$tableId] as $spectatorId => $sepctator) {			
-					$sepctator->tableId = null;
-				}
-
-				$this->sepctatorsByTableId[$tableId] = array();
 			}
 		}
 	}
