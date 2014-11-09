@@ -8,6 +8,11 @@ use Kitsune\ClubPenguin\Packets\Packet;
 use Kitsune\ClubPenguin\Handlers\Game\FindFour;
 
 trait Multiplayer {
+
+	// These are created in World's constructor
+	public $tablePopulationById = array();
+	public $playersByTableId = array();
+	public $gamesByTableId = array();
 	
 	public $rinkPuck = array(0, 0, 0, 0);
 	
@@ -16,42 +21,25 @@ trait Multiplayer {
 		
 		$tableId = Packet::$Data[2];
 		
-		if(count($this->tablePopulationById[$tableId]) >= 2) { // Add to sepctator array
-			$sepctatorCount = count($this->sepctatorsByTableId[$tableId]);
-
-			if(!$sepctatorCount > 5) { // Limit is 5
-				$this->sepctatorsByTableId[$tableId][] = $penguin;
-
-				$penguin->tableId = $tableId;
-
-				Logger::Debug("Spectator added to table $tableId");
-			} else {
-				return;
-			}
-		} else { // Player
-			$seatId = count($this->tablePopulationById[$tableId]);
+		$seatId = count($this->tablePopulationById[$tableId]);
 			
-			if($this->gamesByTableId[$tableId] === null) {
-				$findFourGame = new FindFour();
-				$findFourGame->addPlayer($penguin);
+		if($this->gamesByTableId[$tableId] === null) {
+			$findFourGame = new FindFour();
 
-				$this->gamesByTableId[$tableId] = $findFourGame;
-			} else {
-				$this->gamesByTableId[$tableId]->addPlayer($penguin);
-			}
-
-			$this->tablePopulationById[$tableId][$penguin->username] = $penguin;
-
-			$seatId += 1;
-
-			$penguin->send("%xt%jt%{$penguin->room->internalId}%$tableId%$seatId%");
-
-			$penguin->room->send("%xt%ut%{$penguin->room->internalId}%$tableId%$seatId%");
-			
-			$this->playersByTableId[$tableId][] = $penguin;
-			
-			$penguin->tableId = $tableId;
+			$this->gamesByTableId[$tableId] = $findFourGame;
 		}
+
+		$this->tablePopulationById[$tableId][$penguin->username] = $penguin;
+
+		$seatId += 1;
+
+		$penguin->send("%xt%jt%{$penguin->room->internalId}%$tableId%$seatId%");
+
+		$penguin->room->send("%xt%ut%{$penguin->room->internalId}%$tableId%$seatId%");
+			
+		$this->playersByTableId[$tableId][] = $penguin;
+			
+		$penguin->tableId = $tableId;
 	}
 	
 	// TODO: Check if they're in the Ski Lodge or Attic before sending them the packet
@@ -126,14 +114,19 @@ trait Multiplayer {
 		
 			$penguin->send("%xt%uz%-1%" . sizeof($waddlePlayers) . '%' . implode('%', $waddlePlayers) . '%');
 		} elseif($penguin->tableId !== null) {
-			$seatId = count($this->tablePopulationById[$penguin->tableId]) - 1;
-			
+			$tableId = $penguin->tableId;
+
+			$seatId = count($this->tablePopulationById[$tableId]) - 1;
+				
 			$penguin->send("%xt%jz%-1%$seatId%");
-			$penguin->room->send("%xt%uz%-1%$seatId%{$penguin->username}%");
-			
-			if($seatId == 1) {
-				foreach($this->playersByTableId[$penguin->tableId] as $player) {
-					$player->send("%xt%sz%{$penguin->room->internalId}%0%");
+
+			if($seatId < 2) {
+				$penguin->room->send("%xt%uz%-1%$seatId%{$penguin->username}%");
+
+				if($seatId == 1) {
+					foreach($this->playersByTableId[$tableId] as $player) {
+						$player->send("%xt%sz%{$penguin->room->internalId}%0%");
+					}
 				}
 			}
 		}
@@ -149,7 +142,10 @@ trait Multiplayer {
 		} elseif($penguin->tableId !== null) {
 			$tableId = $penguin->tableId;
 
-			if(in_array($penguin, $this->playersByTableId[$tableId]) && $this->gamesByTableId[$tableId]->ready() === true) {
+			$isPlayer = array_search($penguin, $this->playersByTableId[$tableId]) < 2;
+			$gameReady = count($this->playersByTableId[$tableId]) >= 2;
+
+			if($isPlayer && $gameReady) {
 				$chipColumn = Packet::$Data[2];
 				$chipRow = Packet::$Data[3];
 				$seatId = array_search($penguin, $this->playersByTableId[$tableId]);
@@ -179,7 +175,7 @@ trait Multiplayer {
 					Logger::Warn("Attempted to drop multiple chips");
 				}
 			} else {
-				Logger::Warn("Player {$penguin->id} tried dropping a chip before connecting to a player!");
+				Logger::Warn("Player {$penguin->id} is a spectator or is trying to drop a chip before connecting to a player!");
 			}
 		}
 	}
