@@ -383,7 +383,7 @@ trait Pet {
 					return $furnitureId . '|' . $purchaseDate . '|' . $furnitureQuantity;
 				}, array_keys($penguin->furniture), $penguin->furniture));
 				$penguin->database->updateColumnById($penguin->id, "Furniture", $furnitureString);
-				$penguin->room->send("%xt%puffledig%{$penguin->room->internalId}%{$penguin->id}%$puffleId%2%0%$furnitureId%{$penguin->puffleQuest['firstDig']}%false%");
+				$penguin->room->send("%xt%puffledig%{$penguin->room->internalId}%{$penguin->id}%$puffleId%2%$furnitureId%1%{$penguin->puffleQuest['firstDig']}%false%");
 		} else {
 			$penguin->setCoins($penguin->coins + 150);
 			$penguin->room->send("%xt%puffledig%{$penguin->room->internalId}%{$penguin->id}%$puffleId%0%0%150%{$penguin->puffleQuest['firstDig']}%false%");
