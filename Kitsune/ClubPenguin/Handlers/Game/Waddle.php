@@ -131,17 +131,6 @@ trait Waddle {
 			$this->waddleRooms[$penguin->waddleRoom]->add($penguin);
 		}
 	}
-
-	protected function handleStartGame($socket) {
-		$penguin = $this->penguins[$socket];
-		
-		$waddlePlayers = array();
-		foreach($penguin->room->penguins as $waddlePenguin) {
-			array_push($waddlePlayers, sprintf("%s|%d|%d|%s", $waddlePenguin->username, $waddlePenguin->color, $waddlePenguin->hand, $waddlePenguin->username));
-		}
-		
-		$penguin->send("%xt%uz%-1%" . sizeof($waddlePlayers) . '%' . implode('%', $waddlePlayers) . '%');
-	}
 	
 }
 

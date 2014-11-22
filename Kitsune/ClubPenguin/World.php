@@ -120,7 +120,11 @@ final class World extends ClubPenguin {
 			
 			"pt#spts" => "handleAvatarTransformation",
 			
-			"w#jx" => "handleJoinWaddle"
+			"w#jx" => "handleJoinWaddle",
+			
+			"a#gt" => "handleGetTablePopulation",
+			"a#jt" => "handleJoinTable",
+			"a#lt" => "handleLeaveTable"
 		),
 		
 		"z" => array(
@@ -132,6 +136,7 @@ final class World extends ClubPenguin {
 			"jw" => "handleSendJoinWaddleById",
 			"lw" => "handleLeaveWaddle",
 			"jz" => "handleStartGame",
+			"lz" => "handleQuitGame",
 			
 			"zm" => "handleSendMove"
 		)
@@ -153,8 +158,7 @@ final class World extends ClubPenguin {
 	use Handlers\Play\PlayerTransformation;
 	
 	use Handlers\Game\General;
-	use Handlers\Game\Rink;
-	use Handlers\Game\SledRacing;
+	use Handlers\Game\Multiplayer;
 	use Handlers\Game\Waddle;	
 	
 	public $items = array();
@@ -287,7 +291,14 @@ final class World extends ClubPenguin {
 			
 			unset($careItems[$careId]);
 		}
-		
+
+		$tableIds = range(200, 207);
+		$emptyTable = array();
+
+		$this->tablePopulationById = array_fill_keys($tableIds, $emptyTable);
+		$this->playersByTableId = array_fill_keys($tableIds, $emptyTable);
+		$this->gamesByTableId = array_fill_keys($tableIds, null);
+
 		Logger::Fine("World server is online");
 	}
 	
@@ -335,14 +346,21 @@ final class World extends ClubPenguin {
 	}
 	
 	protected function removePenguin($penguin) {
-		$this->removeClient($penguin->socket);
+		if(isset($this->sockets[$penguin->socket])) {
+			$this->removeClient($penguin->socket);
+		}
 
 		if($penguin->room !== null) {
 			$penguin->room->remove($penguin);
 		}
 		
 		if(isset($this->penguinsById[$penguin->id])) {
-			$this->leaveWaddle($penguin);
+			if($penguin->waddleRoom !== null) {
+				$this->leaveWaddle($penguin);
+			} elseif($penguin->tableId !== null) {
+				$this->leaveTable($penguin);
+			}
+
 			unset($this->penguinsById[$penguin->id]);
 		}
 
@@ -352,16 +370,7 @@ final class World extends ClubPenguin {
 	protected function handleDisconnect($socket) {
 		$penguin = $this->penguins[$socket];
 
-		if($penguin->room !== null) {
-			$penguin->room->remove($penguin);
-		}
-		
-		if(isset($this->penguinsById[$penguin->id])) {
-			$this->leaveWaddle($penguin);
-			unset($this->penguinsById[$penguin->id]);
-		}
-
-		unset($this->penguins[$socket]);
+		$this->removePenguin($penguin);
 
 		Logger::Info("Player disconnected");
 	}

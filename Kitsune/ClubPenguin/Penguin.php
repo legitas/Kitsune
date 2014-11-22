@@ -42,6 +42,8 @@ class Penguin {
 	public $y = 0;
 	public $frame;
 	
+	public $tableId = null;
+
 	public $waddleRoom = null; // Not an object!
 	public $room;
 	
@@ -54,6 +56,12 @@ class Penguin {
 	public function __construct($socket) {
 		$this->socket = $socket;
 		$this->database = new Kitsune\Database();
+	}
+
+	public function addCoins($coins) {
+		$totalCoins = $this->coins + $coins;
+		$this->setCoins($totalCoins);
+		$this->send("%xt%zo%{$this->room->internalId}%$totalCoins%");
 	}
 	
 	public function buyPuffleCareItem($itemId, $itemCost = 0, $howMany = null, $beSilent = false) {
