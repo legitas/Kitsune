@@ -5,12 +5,21 @@ namespace Kitsune\ClubPenguin\Handlers\Play;
 use Kitsune\ClubPenguin\Packets\Packet;
 
 trait Item {
-
+	
+	protected function reverseNumbers($str) {
+		$arr = str_split($str);
+		$returnStr = "";
+		for ($i = sizeof($arr) - 1; $i >= 0; $i--) {
+			$returnStr .= $arr[$i];
+		}
+		return substr($returnStr, 1);
+	}
+	
 	protected function handleGetInventoryList($socket) {
 		$penguin = $this->penguins[$socket];
 		
 		$inventoryList = implode('%', $penguin->inventory);
-		$penguin->send("%xt%gi%-1%$inventoryList%");
+ 	        $penguin->send("%xt%gi%-1%" . self::reverseNumbers($inventoryList) . "%");
 	}
 	
 	protected function handleBuyInventory($socket) {
