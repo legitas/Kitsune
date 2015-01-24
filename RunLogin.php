@@ -1,6 +1,7 @@
 <?php
 
 namespace Kitsune\ClubPenguin;
+use Kitsune\BindException;
 
 date_default_timezone_set("America/Los_Angeles");
 
@@ -18,8 +19,14 @@ spl_autoload_register(function ($path) {
 $cp = new Login();
 
 // A simple example of binding to multiple ports and/or addresses
-// $cp->listen(["127.0.0.1", "192.168.1.159"], [6112, 7432])
-// $cp->listen(["127.0.0.1"], [6112, 7432])
+
+/*
+try {
+	$cp->listen(["127.0.0.1", "192.168.1.159"], [6112, 7432]);
+} catch(BindException $exception) {
+	echo $exception->getMessage(), "\n";
+}
+*/
 
 $cp->listen(0, 6112);
 
