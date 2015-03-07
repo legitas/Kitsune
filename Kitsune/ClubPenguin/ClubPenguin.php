@@ -239,7 +239,16 @@ abstract class ClubPenguin extends Kitsune\Kitsune {
 	}
 	
 	protected function handleWorldPacket($socket) {
+		// p#getdigcooldown is received before xml sometimes.. dunno why
 		if($this->penguins[$socket]->identified == true || Packet::$Handler == "p#getdigcooldown") {
+
+			// Bot detection - there's probably a better way of doing this
+			if(Packet::$Handler !== "p#getdigcooldown") {
+				if(Packet::$Handler !== "j#js" && $this->penguins[$socket]->room === null) {
+					return $this->removePenguin($this->penguins[$socket]);
+				}
+			}
+
 			$worldPacket = Packet::GetInstance();
 			
 			$penguin = $this->penguins[$socket];
