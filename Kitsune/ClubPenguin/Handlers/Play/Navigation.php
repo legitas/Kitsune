@@ -44,6 +44,13 @@ trait Navigation {
 		}
 		
 		$loginKey = Packet::$Data[3];
+
+		// User is attempting to perform exploit
+		// See https://github.com/Kitsune-/Kitsune/issues/28
+		if($loginKey == "") {
+			return $this->removePenguin($penguin);
+		}
+
 		$dbLoginKey = $penguin->database->getColumnById($penguin->id, "LoginKey");
 		
 		if($dbLoginKey != $loginKey) {
