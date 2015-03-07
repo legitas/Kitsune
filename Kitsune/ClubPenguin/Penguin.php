@@ -151,6 +151,8 @@ class Penguin {
 		
 		if(isset($this->furniture[$furnitureId])) {
 			list($lastPurchaseDate, $furnitureQuantity) = $this->furniture[$furnitureId];
+			
+			$furnitureQuantity += 1;
 		}
 		
 		$this->furniture[$furnitureId] = array(time(), $furnitureQuantity);
@@ -281,7 +283,7 @@ class Penguin {
 				$furnitureDetails = explode('|', $furniture);
 				list($furnitureId, $purchaseDate, $quantity) = $furnitureDetails;
 				
-				$this->furniture[$furnitureId] = array($quantity, $purchaseDate);
+				$this->furniture[$furnitureId] = array($purchaseDate, $quantity);
 			}
 		}
 		
