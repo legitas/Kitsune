@@ -15,7 +15,7 @@ trait Igloo {
 			function($furnitureId, $furnitureDetails) {
 				list($purchaseDate, $furnitureQuantity) = $furnitureDetails;
 				
-				return sprintf("%d|%d%|d", $furnitureId, $purchaseDate, $furnitureQuantity);
+				return sprintf("%d|%d|%d", $furnitureId, $purchaseDate, $furnitureQuantity);
 			}, array_keys($penguin->furniture), $penguin->furniture
 		));
 		
