@@ -326,9 +326,22 @@ final class World extends ClubPenguin {
 			$penguin->send("%xt%e%-1%101%");
 			return $this->removePenguin($penguin);
 		}
-		
+
+		// Check if the player's columns match to make sure they aren't trying to spoof anything
+		$trueColumns = $penguin->database->getColumnsById($id, array("Username", "SWID"));
+
+		if($trueColumns["Username"] != $username || $trueColumns["SWID"] != $swid) {
+			return $this->removePenguin($penguin);
+		}
+
 		$hashesArray = explode('#', $playerHashes);
 		list($loginKey, $confirmationHash) = $hashesArray;
+
+		// User is attempting to perform exploit
+		// See https://github.com/Kitsune-/Kitsune/issues/28
+		if($confirmationHash == "") {
+			return $this->removePenguin($penguin);
+		}
 		
 		$dbConfirmationHash = $penguin->database->getColumnById($id, "ConfirmationHash");
 		if($dbConfirmationHash != $confirmationHash) {
@@ -346,9 +359,7 @@ final class World extends ClubPenguin {
 	}
 	
 	protected function removePenguin($penguin) {
-		if(isset($this->sockets[$penguin->socket])) {
-			$this->removeClient($penguin->socket);
-		}
+		$this->removeClient($penguin->socket);
 
 		if($penguin->room !== null) {
 			$penguin->room->remove($penguin);
