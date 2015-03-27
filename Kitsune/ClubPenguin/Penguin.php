@@ -359,12 +359,13 @@ class Penguin {
 			1,
 			$this->membershipDays,
 			$this->avatar,
+			0,
 			$this->avatarAttributes
 		);
 		
 		if(!empty($this->walkingPuffle)) {
 			list($id, $type, $subtype, $hat) = $this->walkingPuffle;
-			array_push($player, $id, $type, $subtype, $hat, 0);
+			array_push($player, $id, $type, $subtype, $hat);
 		}
 		
 		return implode('|', $player);
