@@ -180,7 +180,7 @@ trait Multiplayer {
 			
 			$puckData = implode('%', $this->rinkPuck);
 			
-			$penguin->send("%xt%zm%{$penguin->room->internalId}%{$penguin->id}%$puckData%");
+			$penguin->room->send("%xt%zm%{$penguin->room->internalId}%{$penguin->id}%$puckData%");
 		}
 	}
 	
