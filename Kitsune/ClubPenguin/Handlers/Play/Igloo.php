@@ -272,17 +272,14 @@ trait Igloo {
 	
 	protected function handleGetOpenIglooList($socket) {
 		$penguin = $this->penguins[$socket];
-		$totalLikes = $penguin->database->getTotalIglooLikes($penguin->id);
 		
 		$openIgloos = implode('%', array_map(
 			function($playerId, $username) use ($penguin, $totalLikes) {
-				if($playerId == $penguin->id) {
-					$likes = $totalLikes;
-				} else {
+				if($playerId != $penguin->id) {
 					$likes = $penguin->database->getTotalIglooLikes($playerId);
+				
+					return $playerId . '|' . $username . '|' . $likes . '|0|0';
 				}
-			
-				return $playerId . '|' . $username . '|' . $likes . '|0|0';
 			}, array_keys($this->openIgloos), $this->openIgloos));
 		
 		$penguin->send("%xt%gr%{$penguin->room->internalId}%$totalLikes%0%$openIgloos%");
