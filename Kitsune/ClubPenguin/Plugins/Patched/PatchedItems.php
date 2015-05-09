@@ -35,7 +35,7 @@ final class PatchedItems extends Plugin {
 		
 		if(!isset($this->server->items[$itemId])) {
 			return $penguin->send("%xt%e%-1%402%"); // Item is unavailable
-		} elseif(isset($this->penguin->inventory[$itemId])) {
+		} elseif(in_array($itemId, $this->penguin->inventory)) {
 			return $penguin->send("%xt%e%-1%400%"); // Already owned item
 		} elseif(in_array($itemId, $this->patchedItems)) {
 			return $penguin->send("%xt%e%-1%402%"); // Item is unavailable
