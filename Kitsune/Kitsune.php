@@ -22,17 +22,27 @@ abstract class Kitsune extends Spirit {
 	
 	protected function handleReceive($socket, $data) {
 		Logger::Debug("Received $data");
-		
-		$chunkedArray = explode("\0", $data);
-		array_pop($chunkedArray);
-		
-		foreach($chunkedArray as $rawData) {
-			$packet = Packet::Parse($rawData);
+
+		if(isset($this->penguins[$socket])) {
+			$penguin = $this->penguins[$socket];
 			
-			if(Packet::$IsXML) {
-				$this->handleXmlPacket($socket);
+			if($penguin == null) {
+				return $this->removeClient($socket);
+			} elseif((is_object($penguin) && get_class($penguin) == "Penguin")) {
+				$chunkedArray = explode("\0", $data);
+				array_pop($chunkedArray);
+				
+				foreach($chunkedArray as $rawData) {
+					$packet = Packet::Parse($rawData);
+					
+					if(Packet::$IsXML) {
+						$this->handleXmlPacket($socket);
+					} else {
+						$this->handleWorldPacket($socket);
+					}
+				}
 			} else {
-				$this->handleWorldPacket($socket);
+				return $this->removeClient($socket);
 			}
 		}
 	}
