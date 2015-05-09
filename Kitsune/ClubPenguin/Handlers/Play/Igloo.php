@@ -274,7 +274,7 @@ trait Igloo {
 		$penguin = $this->penguins[$socket];
 		
 		$openIgloos = implode('%', array_map(
-			function($playerId, $username) use ($penguin, $totalLikes) {
+			function($playerId, $username) use ($penguin) {
 				if($playerId != $penguin->id) {
 					$likes = $penguin->database->getTotalIglooLikes($playerId);
 				
