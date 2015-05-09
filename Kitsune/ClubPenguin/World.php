@@ -5,6 +5,8 @@ namespace Kitsune\ClubPenguin;
 use Kitsune\Logging\Logger;
 use Kitsune\ClubPenguin\Handlers;
 use Kitsune\ClubPenguin\Packets\Packet;
+// Used to remove the penguin from the igloo maps when disconnected.
+use Handlers\Play\Igloo;
 
 final class World extends ClubPenguin {
 
@@ -359,6 +361,11 @@ final class World extends ClubPenguin {
 	}
 	
 	protected function removePenguin($penguin) {
+		// Remove the penguin from igloo maps if included.
+		if(isset($this->openIgloos[$penguin->id])) {
+			unset($this->openIgloos[$penguin->id]);
+		}
+		
 		$this->removeClient($penguin->socket);
 
 		if($penguin->room !== null) {
